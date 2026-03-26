@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block main %}
+<h2>Вход</h2>
+<form action="{{ url_for('login') }}" method="POST" style="max-width: 400px; margin-top: 1.5rem;">
+    <label for="email">Электронная почта</label>
+    <input input type="email" name="email" placeholder="ail@..." required>
+    <br/><br/>
+    <label for="password">Пароль</label>
+    <input type="password" name="password" required>
+    <br/><br/>
+    <button type="submit">Отправить</button>
+</form>
+<a class='authentication' href="{{url_for('register')}}" >Регистрация</a>
+{% if err %}
+    <span class="error-msg">{{err}}</span>
+{% endif %}
+{% endblock main %}

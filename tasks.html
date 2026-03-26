@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+<head>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        .todo{
+            width: 200px;
+            height: 200px;
+            background-color: red;
+            border-radius: 10px;
+            padding: 10px
+        }
+    </style>
+</head>
+{% block main %}
+<h1>Задачи</h1>
+<div class="todo-container">
+    <div class="todo">
+        <h4 class="todo-name">Задача-1</h4>
+        <span class="todo-date">20-06-1945</span>
+        <input type="checkbox" name="" id="">
+        <hr>
+        <span class="todo-discription">50 simvol</span>
+    </div>
+</div>
+{% endblock main %}

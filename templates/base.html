@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+    <title>{% block title %}TeamFlow{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <div class="logo"><a href="{{ url_for('home') }}">TeamFlow</a></div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('home') }}">Главная</a></li>
+                <li><a href="{{ url_for('register') }}">Регистрация</a></li>
+                <li><a href="{{ url_for('login') }}">Вход</a></li>
+                <li><a href="{{ url_for('profile') }}">Мой профиль</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% block main %}{% endblock %}
+    </main>
+
+    {#<footer>
+        <p>&copy; 2025 TeamFlow. Управляйте задачами вашей команды легко.</p>
+    </footer> #}
+</body>
+</html>

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}TeamFlow - Профиль {{ user.username }}{% endblock %}
+
+{% block main %}
+<div class="profile-card">
+    <h2>Профиль пользователя</h2>
+    <p><strong>Имя пользователя:</strong> {{ user.username }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Роль:</strong>
+        {% if user.role == 'admin' %}
+            <span style="color: #e67e22;">Администратор</span>
+        {% else %}
+            <span style="color: #2c3e50;">Исполнитель</span>
+        {% endif %}
+    </p>
+    <hr>
+</div>
+{% endblock main %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}TeamFlow - Регистрация{% endblock %}
+
+{% block main %}
+    <h2>Регистрация нового пользователя</h2>
+    <form action="{{ url_for('register') }}" method="POST" style="max-width: 400px; margin-top: 1.5rem;">
+        <div class="form-group">
+            <label for="username">Имя пользователя</label>
+            <input type="text" id="username" name="username" placeholder="Введите username" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Пароль</label>
+            <input type="password" id="password" name="password" placeholder="******" required>
+        </div>
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+    <a class='authentication' href="{{url_for('login')}}" >Вход</a>
+    {% if err %}
+        <span class="error-msg">Ошибка: имя пользователя или почта уже заняты</span>
+    {% endif %}
+{% endblock %}

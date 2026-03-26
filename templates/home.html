@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}TeamFlow - Главная{% endblock %}
+
+{% block main %}
+    <h1>Добро пожаловать в TeamFlow!</h1>
+    <p style="margin-top: 1rem; font-size: 1.2rem; color: #2c3e50;">
+        Простая система управления задачами для вашей команды разработчиков.
+    </p>
+    <p style="margin-top: 0.5rem;">
+        Создавайте задачи, отслеживайте прогресс и оставайтесь синхронизированными.
+    </p>
+    <div style="margin-top: 2rem;">
+        <a href="{{ url_for('register') }}" class="btn">Присоединиться к команде</a>
+    </div>
+{% endblock %}
