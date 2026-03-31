@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block main %}
+<style>
+  .tasks-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .tasks-header {
+    margin-bottom: 30px;
+    text-align: center;
+  }
+
+  .tasks-header h1 {
+    font-size: 2.2rem;
+    color: #2c3e50;
+    margin-bottom: 8px;
+  }
+
+  .tasks-header #date-display {
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    font-weight: normal;
+  }
+
+  /* Сетка карточек */
+  .todo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  /* Карточка задачи */
+  .todo-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #eef2f5;
+    position: relative;
+  }
+
+  .todo-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Ссылка на заголовок */
+  .todo-name-link {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #1e2a3a;
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 8px;
+    transition: color 0.2s;
+  }
+
+  .todo-name-link:hover {
+    color: #3b82f6;
+    text-decoration: underline;
+  }
+
+  .todo-date {
+    font-size: 0.8rem;
+    color: #6c757d;
+    background: #f8f9fa;
+    padding: 4px 8px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+
+  .todo-description {
+    font-size: 0.95rem;
+    color: #4a5568;
+    line-height: 1.4;
+    margin: 12px 0;
+    min-height: 60px;
+  }
+
+  .todo-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #edf2f7;
+  }
+
+  .todo-footer label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #2d3748;
+    cursor: pointer;
+  }
+
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #3b82f6;
+  }
+
+  /* Адаптивность */
+  @media (max-width: 640px) {
+    .todo-grid {
+      grid-template-columns: 1fr;
+    }
+    .tasks-section {
+      padding: 16px;
+    }
+  }
+</style>
+
+<div class="tasks-section">
+  <div class="tasks-header">
+    <h1>{% if created %}Созданные {% endif %}Задачи</h1>
+    <h2 id="date-display">Сегодня — </h2>
+  </div>
+
+  <div class="todo-grid">
+    {% if tasks %}
+      {% for task in tasks %}
+        <div class="todo-card" style="{% if task.status == 'done' %}opacity: 0.6; background: #f8f9fa;{% endif %}">
+          <!-- Заголовок с ссылкой на детали -->
+          <a href="{{ url_for('task_detail', task_id=task.id) }}" class="todo-name-link">
+            {{ task.title }}
+          </a>
+          <div class="todo-date">
+            {{ task.created_at.strftime('%d.%m %H:%M') if task.created_at else '' }}
+          </div>
+          <div class="todo-description">
+            {{ task.description[:50] }}{% if task.description|length > 50 %}...{% endif %}
+          </div>
+          <div class="todo-footer">
+            <!-- Форма для обновления статуса -->
+            <form action="{{ url_for('update_status', task_id=task.id) }}" method="POST" id="form-{{ task.id }}">
+              <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" 
+                       name="is_done" 
+                       onchange="document.getElementById('form-{{ task.id }}').submit()"
+                       {% if task.status == 'done' %}checked{% endif %}>
+                {% if task.status == 'done' %}
+                  <span style="color: #28a745; font-weight: bold;">Выполнено</span>
+                {% else %}
+                  <span>Выполнить</span>
+                {% endif %}
+              </label>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div style="text-align: center; grid-column: 1 / -1; margin-top: 2rem;">
+        <h3>Задач пока нет.</h3>
+        {% if created %}
+          <p><a href="{{ url_for('create_task') }}" class="btn" style="display:inline-block; margin-top:10px;">Создать первую задачу</a></p>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  (function() {
+    const dateElement = document.getElementById('date-display');
+    if (dateElement) {
+      const today = new Date().toLocaleDateString('ru-RU', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      dateElement.textContent += today;
+    }
+  })();
+</script>
+{% endblock main %}

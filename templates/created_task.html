@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block main %}
+<style>
+  /* Общие стили (повторяют стили из списка задач) */
+  .form-section {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .form-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .form-header h1 {
+    font-size: 2rem;
+    color: #2c3e50;
+    margin-bottom: 8px;
+  }
+
+  .form-header p {
+    color: #7f8c8d;
+  }
+
+  /* Карточка формы */
+  .task-form-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 32px 28px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eef2f5;
+  }
+
+  .form-group {
+    margin-bottom: 24px;
+  }
+
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    color: #1e2a3a;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+  }
+
+  .form-group label .required {
+    color: #e53e3e;
+    margin-left: 4px;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 1rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 12px;
+    background-color: #fff;
+    transition: all 0.2s ease;
+    font-family: inherit;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  /* Кнопки */
+  .form-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+    margin-top: 32px;
+  }
+
+  .btn-primary {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 40px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    font-size: 0.9rem;
+  }
+
+  .btn-primary:hover {
+    background-color: #2563eb;
+  }
+
+  .btn-secondary {
+    background-color: #f1f5f9;
+    color: #1e293b;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 40px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: background 0.2s ease;
+  }
+
+  .btn-secondary:hover {
+    background-color: #e2e8f0;
+  }
+
+  /* Адаптивность */
+  @media (max-width: 640px) {
+    .task-form-card {
+      padding: 20px;
+    }
+    .form-actions {
+      flex-direction: column;
+    }
+    .btn-primary, .btn-secondary {
+      text-align: center;
+    }
+  }
+</style>
+
+<div class="form-section">
+  {% if manager %}
+  <div class="form-header">
+    <h1>Новая задача</h1>
+    <p>Заполните поля, чтобы поставить задачу исполнителю</p>
+  </div>
+
+  <div class="task-form-card">
+    <form method="POST" action="{{ url_for('create_task') }}">
+
+      <!-- Заголовок -->
+      <div class="form-group">
+        <label for="title">Название задачи <span class="required">*</span></label>
+        <input type="text" id="title" name="title" placeholder="Название..." required autofocus>
+      </div>
+
+      <!-- Описание -->
+      <div class="form-group">
+        <label for="description">Описание</label>
+        <textarea id="description" name="description" placeholder="Подробности..."></textarea>
+      </div>
+
+      {# <!-- Статус -->
+      <div class="form-group">
+        <label for="status">Статус</label>
+        <select id="status" name="status">
+          <option value="new">🟡 Новая</option>
+          <option value="in_progress">🔵 В работе</option>
+          <option value="done">✅ Выполнена</option>
+        </select>
+      </div> #}
+
+      <!-- Исполнитель (user_id) -->
+      <div class="form-group">
+        <label for="user_id">Исполнитель <span class="required">*</span></label>
+        <select id="user_id" name="user_id" required>
+        {% if labors %}
+          <option value="" disabled selected>– Выберите сотрудника –</option>
+            {% for labor in labors %}
+              <option value="{{ labor.id }}">{{ labor.username }}</option>
+            {% endfor %}
+          {% else %}
+            <option value="" disabled>Нет доступных пользователей</option>
+          {% endif %}
+        </select>
+      </div>
+
+      <!-- Кнопки -->
+      <div class="form-actions">
+{#        <a href="{{ url_for('task_list') }}" class="btn-secondary">Отмена</a> #}
+        <button type="submit" class="btn-primary">Создать задачу</button>
+      </div>
+    </form>
+  </div>
+  {% else %}
+  <div class="form-header">
+    <h1>Вы не можете создавать задачи</h1>
+     <br><br><br>
+     <a href="{{ url_for('tasks') }}" class="btn-secondary">На главную</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock main %}

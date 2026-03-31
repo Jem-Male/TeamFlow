@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block main %}
+<style>
+  /* Стили (повторяют единую гамму) */
+  .detail-section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .detail-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .detail-header h1 {
+    font-size: 2rem;
+    color: #2c3e50;
+    margin-bottom: 8px;
+  }
+
+  .detail-header p {
+    color: #7f8c8d;
+  }
+
+  .task-card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eef2f5;
+  }
+
+  .task-field {
+    margin-bottom: 24px;
+  }
+
+  .task-field-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    margin-bottom: 6px;
+  }
+
+  .task-field-value {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #1e2a3a;
+    word-break: break-word;
+    background: #f8fafc;
+    padding: 12px 16px;
+    border-radius: 16px;
+    border-left: 4px solid #3b82f6;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 40px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background-color: #e2e8f0;
+    color: #1e293b;
+  }
+
+  .status-badge.new {
+    background-color: #fef3c7;
+    color: #b45309;
+  }
+  .status-badge.in_progress {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+  .status-badge.done {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  .task-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #edf2f7;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+  }
+
+  .btn-primary {
+    background-color: #3b82f6;
+    color: white;
+  }
+  .btn-primary:hover {
+    background-color: #2563eb;
+  }
+
+  .btn-outline {
+    background-color: transparent;
+    border: 1px solid #cbd5e0;
+    color: #1e293b;
+  }
+  .btn-outline:hover {
+    background-color: #f1f5f9;
+  }
+
+  .btn-danger {
+    background-color: #ef4444;
+    color: white;
+  }
+  .btn-danger:hover {
+    background-color: #dc2626;
+  }
+
+  @media (max-width: 640px) {
+    .task-card {
+      padding: 20px;
+    }
+    .task-actions {
+      flex-direction: column;
+    }
+    .btn {
+      text-align: center;
+    }
+  }
+</style>
+
+<div class="detail-section">
+  <div class="detail-header">
+    <h1>📌 {{ task.title }}</h1>
+    <p>Подробная информация о задаче</p>
+  </div>
+
+  <div class="task-card">
+    <!-- Заголовок (уже выведен выше, но можно дублировать) -->
+    <div class="task-field">
+      <div class="task-field-label">Название</div>
+      <div class="task-field-value">{{ task.title }}</div>
+    </div>
+
+    <!-- Описание -->
+    <div class="task-field">
+      <div class="task-field-label">Описание</div>
+      <div class="task-field-value">
+        {% if task.description %}
+          {{ task.description }}
+        {% else %}
+          <span style="color: #94a3b8;">— Не указано —</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Статус -->
+    <div class="task-field">
+      <div class="task-field-label">Статус</div>
+      <div class="task-field-value">
+        <span class="status-badge {{ task.status }}">
+          {% if task.status == 'new' %}🟡 Новая
+          {% elif task.status == 'in_progress' %}🔵 В работе
+          {% elif task.status == 'done' %}✅ Выполнена
+          {% else %}{{ task.status }}
+          {% endif %}
+        </span>
+      </div>
+    </div>
+
+    <!-- Исполнитель -->
+    <div class="task-field">
+      <div class="task-field-label">Исполнитель</div>
+      <div class="task-field-value">
+        {% if task.user %}
+          {{ task.user.name or task.user.username }}
+        {% else %}
+          <span style="color: #94a3b8;">Не назначен</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Дата создания -->
+    <div class="task-field">
+      <div class="task-field-label">Создана</div>
+      <div class="task-field-value">
+        {{ task.created_at.strftime('%d.%m.%Y в %H:%M') }}
+      </div>
+    </div>
+
+    <!-- Кнопки действий -->
+  <div class="task-actions">
+    <a href="{{ url_for('tasks') }}" class="btn btn-outline">← Назад к списку</a>
+    
+    {# Пока роут не написан, лучше скрыть кнопку или создать пустой роут #}
+    {# <a href="#" class="btn btn-primary">✏️ Редактировать</a> #}
+    
+    <form action="{{ url_for('delete_task', task_id=task.id) }}" method="POST" style="display: inline;">
+      <button type="submit" class="btn btn-danger" onclick="return confirm('Вы уверены?')">🗑 Удалить</button>
+    </form>
+  </div>
+
+  </div>
+</div>
+{% endblock main %}

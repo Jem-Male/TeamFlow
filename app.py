@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-from models import db, User
+from models import db, User, Task
 from sqlalchemy import select, or_
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -11,12 +11,7 @@ db.init_app(app)
 
 @app.route('/')
 def home():
-    us = None
-    user = session.get('user_id') 
-    if user:
-        us = db.session.scalar(select(User).where(user == User.id))
-    
-    return render_template('home.html', us = us)
+    return render_template('home.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -83,6 +78,101 @@ def profile():
         user = db.session.scalar(select(User).where(User.id == client))
         return render_template('profile.html', user = user, task=False)
     return redirect(url_for('register'))
+
+@app.route('/tasks')
+def tasks():
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for('login'))
+    
+    user = db.session.get(User, user_id)
+    if user.role == "manager":
+        # Менеджер видит ВСЕ задачи всех пользователей
+        tasks_list = db.session.scalars(select(Task)).all()
+        return render_template('tasks.html', tasks=tasks_list, created=True)
+    else:
+        # Исполнитель видит только свои
+        tasks_list = db.session.scalars(select(Task).where(Task.user_id == user.id)).all()
+        return render_template('tasks.html', tasks=tasks_list, created=False)
+    
+    
+@app.route('/create_task', methods=['GET','POST'])
+def create_task():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    manager = db.session.scalar(select(User).where(User.id == user_id, User.role == 'manager'))
+    
+    if request.method == 'POST':
+        if not manager:
+            return "У вас нет прав для этого действия", 403
+        
+        title = request.form.get('title')
+        description = request.form.get('description')
+        performer_id = request.form.get('user_id')
+        
+        new_task = Task(
+            title=title,
+            description=description,
+            user_id=performer_id 
+        )
+        
+        db.session.add(new_task)
+        db.session.commit()
+        return redirect(url_for('tasks')) # Переходим к списку задач
+
+    if manager: 
+        labors = db.session.scalars(select(User).where(User.role == "performer")).all()
+        return render_template('created_task.html', manager=True, labors=labors)
+    
+    return render_template('created_task.html', manager=False, labors=False)
+
+@app.route('/task/<int:task_id>/update_status', methods=['POST'])
+def update_status(task_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    # Ищем задачу или выдаем 404, если её нет
+    task = db.get_or_404(Task, task_id)
+    user = db.session.scalar(select(User).where(User.id == user_id))
+
+    # Проверка прав: менеджер может всё, исполнитель — только свои задачи
+    if user.role == 'manager' or task.user_id == user.id:
+        # Если статус уже done — можем вернуть в new (тоггл), 
+        # но по твоему запросу просто ставим 'done'
+        task.status = 'done' if task.status != 'done' else 'new'
+        
+        db.session.commit()
+        return redirect(url_for('tasks'))
+
+    return "У вас нет прав для изменения этой задачи", 403
+
+@app.route('/task/<int:task_id>')
+def task_detail(task_id):
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    task = db.get_or_404(Task, task_id)
+    return render_template('task_detail.html', task=task)
+
+@app.route('/task/<int:task_id>/delete', methods=['POST'])
+def delete_task(task_id):
+    user_id = session.get('user_id')
+    user = db.session.get(User, user_id)
+    task = db.get_or_404(Task, task_id)
+    
+    if user.role == 'manager':
+        db.session.delete(task)
+        db.session.commit()
+    return redirect(url_for('tasks'))
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('home'))
+
 
 if __name__ == '__main__':
     with app.app_context():
