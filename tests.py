@@ -45,7 +45,7 @@ def test_profile_redirects_unauthenticated(client):
     """Редирект на регистрацию, если не залогинен (как в твоем новом app.py)."""
     response = client.get('/profile')
     assert response.status_code == 302
-    assert "/register" in response.headers["Location"]
+    assert "/login" in response.headers["Location"]
 
 def test_register_user(client):
     """Регистрация теперь ведет в Профиль (проверяем это)."""
